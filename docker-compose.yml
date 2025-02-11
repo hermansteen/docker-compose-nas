@@ -49,33 +49,6 @@ services:
       - homepage.widget.type=radarr
       - homepage.widget.url=http://radarr:7878/radarr
       - homepage.widget.key=${RADARR_API_KEY}
-  lidarr:
-    image: lscr.io/linuxserver/lidarr
-    container_name: lidarr
-    environment:
-      - PUID=${USER_ID}
-      - PGID=${GROUP_ID}
-      - TZ=${TIMEZONE}
-    volumes:
-      - ${CONFIG_ROOT:-.}/lidarr:/config
-      - ${DATA_ROOT}:/data
-    restart: always
-    healthcheck:
-      test: [ "CMD", "curl", "--fail", "http://127.0.0.1:8686/lidarr/ping" ]
-      interval: 30s
-      retries: 10
-    labels:
-      - homepage.group=Media
-      - homepage.name=Lidarr
-      - homepage.icon=lidarr.png
-      - homepage.href=/lidarr
-      - homepage.description=Music management
-      - homepage.weight=2
-      - homepage.widget.type=lidarr
-      - homepage.widget.url=http://lidarr:8686/lidarr
-      - homepage.widget.key=${LIDARR_API_KEY}
-    profiles:
-      - lidarr
   bazarr:
     image: lscr.io/linuxserver/bazarr
     container_name: bazarr
@@ -148,18 +121,6 @@ services:
       - homepage.widget.type=prowlarr
       - homepage.widget.url=http://prowlarr:9696/prowlarr
       - homepage.widget.key=${PROWLARR_API_KEY}
-  flaresolverr:
-    image: 21hsmw/flaresolverr:nodriver
-    container_name: flaresolverr
-    restart: always
-    environment:
-      - LOG_LEVEL=${LOG_LEVEL:-info}
-      - LOG_HTML=${LOG_HTML:-false}
-      - CAPTCHA_SOLVER=${CAPTCHA_SOLVER:-none}
-      - TZ=${TIMEZONE}
-    labels:
-    profiles:
-      - flaresolverr
   qbittorrent:
     image: lscr.io/linuxserver/qbittorrent:libtorrentv1
     container_name: qbittorrent
@@ -284,6 +245,15 @@ services:
       - homepage.widget.type=jellyfin
       - homepage.widget.url=http://jellyfin:8096/jellyfin
       - homepage.widget.key=${JELLYFIN_API_KEY}
+  requestrr:
+    image: thomst08/requestrr
+    hostname: requestrr
+    container_name: requestrr
+    ports:
+    - 4545:4545
+    volumes:
+    - ${CONFIG_ROOT:-.}/requestrr:/app/config
+    restart: unless-stopped
   homepage:
     image: ghcr.io/gethomepage/homepage:latest
     container_name: homepage

@@ -39,7 +39,7 @@ function update_bazarr_config {
 }
 
 for container in $(docker ps --format '{{.Names}}'); do
-  if [[ "$container" =~ ^(radarr|sonarr|lidarr|prowlarr)$ ]]; then
+  if [[ "$container" =~ ^(radarr|sonarr|prowlarr)$ ]]; then
     update_arr_config "$container"
   elif [[ "$container" =~ ^(bazarr)$ ]]; then
     update_bazarr_config "$container"
