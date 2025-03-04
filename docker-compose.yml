@@ -1,4 +1,28 @@
 services:
+  traefik:
+    image: traefik:latest
+    container_name: traefik
+    command:
+      - "--providers.docker=true"  # Enable Docker provider
+      - "--providers.docker.exposedbydefault=false"  # Only expose services with explicit labels
+      - "--entrypoints.web.address=:80"  # HTTP entrypoint
+      - "--api.dashboard=true"  # Enable dashboard
+      - "--api.insecure=true"  # Allow HTTP access to the dashboard
+      - "--entrypoints.web.forwardedheaders.insecure" # Allow insecure forwarded headers
+    ports:
+      - "80:80"  # HTTP
+      - "8080:8080"  # Dashboard (optional)
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro  # Access Docker API
+    labels:
+      - homepage.group=Infrastructure
+      - homepage.name=Traefik
+      - homepage.icon=traefik.png
+      - homepage.href=/traefik
+      - homepage.description=Reverse Proxy
+      - homepage.widget.type=traefik
+      - homepage.widget.url=http://traefik:8080  # Dashboard URL
+    restart: always
   sonarr:
     image: lscr.io/linuxserver/sonarr
     container_name: sonarr
@@ -24,6 +48,10 @@ services:
       - homepage.widget.type=sonarr
       - homepage.widget.url=http://sonarr:8989/sonarr
       - homepage.widget.key=${SONARR_API_KEY}
+      - "traefik.enable=true"
+      - "traefik.http.routers.sonarr.entrypoints=web"
+      - "traefik.http.routers.sonarr.rule=PathPrefix(`/sonarr`)"
+      - "traefik.http.services.sonarr.loadbalancer.server.port=8989"
   radarr:
     image: lscr.io/linuxserver/radarr
     container_name: radarr
@@ -49,6 +77,10 @@ services:
       - homepage.widget.type=radarr
       - homepage.widget.url=http://radarr:7878/radarr
       - homepage.widget.key=${RADARR_API_KEY}
+      - "traefik.enable=true"
+      - "traefik.http.routers.radarr.entrypoints=web"
+      - "traefik.http.routers.radarr.rule=PathPrefix(`/radarr`)"
+      - "traefik.http.services.radarr.loadbalancer.server.port=7878"
   bazarr:
     image: lscr.io/linuxserver/bazarr
     container_name: bazarr
@@ -74,6 +106,10 @@ services:
       - homepage.widget.type=bazarr
       - homepage.widget.url=http://bazarr:6767/bazarr
       - homepage.widget.key=${BAZARR_API_KEY}
+      - "traefik.enable=true"
+      - "traefik.http.routers.bazarr.entrypoints=web"
+      - "traefik.http.routers.bazarr.rule=PathPrefix(`/bazarr`)"
+      - "traefik.http.services.bazarr.loadbalancer.server.port=6767"
   jellyseerr:
     image: fallenbagel/jellyseerr:latest
     container_name: jellyseerr
@@ -97,6 +133,10 @@ services:
       - homepage.widget.type=jellyseerr
       - homepage.widget.url=http://jellyseerr:5055
       - homepage.widget.key=${JELLYSEERR_API_KEY}
+      - "traefik.enable=true"
+      - "traefik.http.routers.jellyseerr.entrypoints=web"
+      - "traefik.http.routers.jellyseerr.rule=PathPrefix(`/jellyseerr`)"
+      - "traefik.http.services.jellyseerr.loadbalancer.server.port=5055"
   prowlarr:
     image: lscr.io/linuxserver/prowlarr:latest
     container_name: prowlarr
@@ -121,6 +161,10 @@ services:
       - homepage.widget.type=prowlarr
       - homepage.widget.url=http://prowlarr:9696/prowlarr
       - homepage.widget.key=${PROWLARR_API_KEY}
+      - "traefik.enable=true"
+      - "traefik.http.routers.prowlarr.entrypoints=web"
+      - "traefik.http.routers.prowlarr.rule=PathPrefix(`/prowlarr`)"
+      - "traefik.http.services.prowlarr.loadbalancer.server.port=9696"
   qbittorrent:
     image: lscr.io/linuxserver/qbittorrent:libtorrentv1
     container_name: qbittorrent
@@ -157,7 +201,7 @@ services:
       - homepage.widget.username=${QBITTORRENT_USERNAME}
       - homepage.widget.password=${QBITTORRENT_PASSWORD}
   vpn:
-    image: gchr.io/bubuntux/nordvpn
+    image: ghcr.io/bubuntux/nordlynx
     container_name: vpn
     cap_add:
       - NET_ADMIN
@@ -165,13 +209,19 @@ services:
       - SYS_MODULE
     environment:
       - CONNECT=Sweden
-      - TECHNOLOGY=NordLynx
+      - PRIVATE_KEY=${NORD_PRIVATE_KEY}
       - NETWORK=192.168.1.0/24  # So it can be accessed within the local network
     sysctls:
       - net.ipv4.conf.all.src_valid_mark=1
       - net.ipv6.conf.default.disable_ipv6=1
       - net.ipv6.conf.all.disable_ipv6=1
       - net.ipv6.conf.lo.disable_ipv6=1
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.qbittorrent.entrypoints=web"
+      - "traefik.http.routers.qbittorrent.rule=PathPrefix(`/qbittorrent`)"
+      - "traefik.http.services.qbittorrent.loadbalancer.server.port=8080"
+      - "traefik.http.middlewares.qbittorrent-stripprefix.stripprefix.prefixes=/qbittorrent"
     healthcheck:
       test: ping -c 1 www.google.com || exit 1
       interval: 30s
@@ -214,6 +264,11 @@ services:
       - homepage.widget.type=sabnzbd
       - homepage.widget.url=http://sabnzbd:8080/sabnzbd
       - homepage.widget.key=${SABNZBD_API_KEY}
+      # Traefik labels
+      - "traefik.enable=true"
+      - "traefik.http.routers.sabnzbd.entrypoints=web"
+      - "traefik.http.routers.sabnzbd.rule=PathPrefix(`/sabnzbd`)"
+      - "traefik.http.services.sabnzbd.loadbalancer.server.port=8080"
     profiles:
       - sabnzbd
   jellyfin:
@@ -245,6 +300,11 @@ services:
       - homepage.widget.type=jellyfin
       - homepage.widget.url=http://jellyfin:8096/jellyfin
       - homepage.widget.key=${JELLYFIN_API_KEY}
+      # Traefik labels
+      - "traefik.enable=true"
+      - "traefik.http.routers.jellyfin.entrypoints=web"
+      - "traefik.http.routers.jellyfin.rule=PathPrefix(`/jellyfin`)"
+      - "traefik.http.services.jellyfin.loadbalancer.server.port=8096"
   requestrr:
     image: thomst08/requestrr
     hostname: requestrr
@@ -253,6 +313,11 @@ services:
     - 4545:4545
     volumes:
     - ${CONFIG_ROOT:-.}/requestrr:/app/config
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.requestrr.entrypoints=web"
+      - "traefik.http.routers.requestrr.rule=PathPrefix(`/requestrr`)"
+      - "traefik.http.services.requestrr.loadbalancer.server.port=4545"
     restart: unless-stopped
   homepage:
     image: ghcr.io/gethomepage/homepage:latest
@@ -270,6 +335,10 @@ services:
       - ${CONFIG_ROOT:-.}/homepage:/app/config
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - ${DATA_ROOT}:/data
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.homepage.entrypoints=web"
+      - "traefik.http.routers.homepage.rule=PathPrefix(`/homepage`)"
     restart: always
     command: [sh, -c, "cp -n /app/config/tpl/*.yaml /app/config && node server.js"]
   watchtower:

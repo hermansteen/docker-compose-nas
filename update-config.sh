@@ -1,5 +1,3 @@
-#!/bin/bash
-
 # See https://stackoverflow.com/a/44864004 for the sed GNU/BSD compatible hack
 
 function update_arr_config {
