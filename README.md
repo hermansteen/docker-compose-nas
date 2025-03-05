@@ -19,6 +19,7 @@ I am running it in NixOS.
     - [File Structure](#file-structure)
     - [Download Client](#download-client)
   - [Prowlarr](#prowlarr)
+    - [Trackers / Indexers](#trackers--indexers)
   - [qBittorrent](#qbittorrent)
   - [Jellyfin](#jellyfin)
   - [Traefik](#traefik)
@@ -35,10 +36,10 @@ I am running it in NixOS.
 | [Radarr](https://radarr.video)                              | Movie collection manager for Usenet and BitTorrent users                                      | [linuxserver/radarr](https://hub.docker.com/r/linuxserver/radarr)                        | /radarr      |
 | [Bazarr](https://www.bazarr.media/)                         | Companion application to Sonarr and Radarr that manages and downloads subtitles               | [linuxserver/bazarr](https://hub.docker.com/r/linuxserver/bazarr)                        | /bazarr      |
 | [Prowlarr](https://github.com/Prowlarr/Prowlarr)            | Indexer aggregator for Sonarr and Radarr                                                      | [linuxserver/prowlarr:latest](https://hub.docker.com/r/linuxserver/prowlarr)             | /prowlarr    |
-| [NordLynx VPN](https://github.com/bubuntux/nordlynx)        | Encapsulate qBittorrent traffic in [Nordlynx](https://www.nordvpn.com/)                       | [thrnz/docker-wireguard-pia](https://ghcr.io/bubuntux/nordlynx)                          |              |
+| [NordLynx VPN](https://github.com/bubuntux/nordlynx)        | Encapsulate qBittorrent traffic in [Nordlynx](https://www.nordvpn.com/)                       | [bubuntux/nordlynx](https://ghcr.io/bubuntux/nordlynx)                          |              |
 | [qBittorrent](https://www.qbittorrent.org)                  | Bittorrent client with a complete web UI<br/>Uses VPN network<br/>Using Libtorrent 1.x        | [linuxserver/qbittorrent:libtorrentv1](https://hub.docker.com/r/linuxserver/qbittorrent) | /qbittorrent |
 | [Unpackerr](https://github.com/ManiMatter/decluttarr)       | Automated Archive Extractions                                                                 | [manimatter/decluttarr](https://ghcr.io/manimatter/decluttarr)                           |              |
-| [Decluttarr](https://unpackerr.zip)                         | Automated removal of stalled, failed, missing files in qbittorrent                            | [golift/unpackerr](https://hub.docker.com/r/golift/unpackerr)                            |              |
+| [Decluttarr](https://unpackerr.zip)                         | Automated removal of stalled, failed, missing files in the queue                            | [golift/unpackerr](https://hub.docker.com/r/golift/unpackerr)                            |              |
 | [Jellyfin](https://jellyfin.org)                            | Media server designed to organize, manage, and share digital media files to networked devices | [linuxserver/jellyfin](https://hub.docker.com/r/linuxserver/jellyfin)                    | /jellyfin    |
 | [Requestrr](https://github.com/thomst08/requestrr)          | Discord chatbot requester service for TV and Movies                                           | [thomst08/requestrr](https://hub.docker.com/r/thomst08/requestrr)                        |              |
 | [Traefik](https://traefik.io)                               | Reverse proxy                                                                                 | [traefik](https://hub.docker.com/_/traefik)                                              |              |
@@ -125,10 +126,12 @@ place in the VPN container, the hostname for qBittorrent is the hostname of the 
 
 The indexers are configured through Prowlarr. They synchronize automatically to Radarr and Sonarr.
 
-Radarr and Sonarr may then be added via Settings > Apps. The Prowlarr server is `http://prowlarr:9696/prowlarr`, the Radarr server
-is `http://radarr:7878/radarr` Sonarr `http://sonarr:8989/sonarr`, and Lidarr `http://lidarr:8686/lidarr`.
+Radarr and Sonarr may then be added via Settings > Apps. The Prowlarr server is `http://prowlarr:9696/prowlarr`, the Radarr server is `http://radarr:7878/radarr` Sonarr `http://sonarr:8989/sonarr`.
 
 Their API keys can be found in Settings > Security > API Key.
+
+### Trackers / Indexers
+Private trackers are all the rage, but as the name indicates: they are not accessible to the general public. I am running only public trackers as of right now. And it's working okay, but after running publics for a while and maintaining a decent ratio you should probably try to move to a private tracker.
 
 ## qBittorrent
 
