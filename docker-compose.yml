@@ -14,14 +14,6 @@ services:
       - "8080:8080"  # Dashboard (optional)
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro  # Access Docker API
-    labels:
-      - homepage.group=Infrastructure
-      - homepage.name=Traefik
-      - homepage.icon=traefik.png
-      - homepage.href=/traefik
-      - homepage.description=Reverse Proxy
-      - homepage.widget.type=traefik
-      - homepage.widget.url=http://traefik:8080  # Dashboard URL
     restart: always
   sonarr:
     image: lscr.io/linuxserver/sonarr
@@ -39,15 +31,6 @@ services:
       interval: 30s
       retries: 10
     labels:
-      - homepage.group=Media
-      - homepage.name=Sonarr
-      - homepage.icon=sonarr.png
-      - homepage.href=/sonarr
-      - homepage.description=Series management
-      - homepage.weight=0
-      - homepage.widget.type=sonarr
-      - homepage.widget.url=http://sonarr:8989/sonarr
-      - homepage.widget.key=${SONARR_API_KEY}
       - "traefik.enable=true"
       - "traefik.http.routers.sonarr.entrypoints=web"
       - "traefik.http.routers.sonarr.rule=PathPrefix(`/sonarr`)"
@@ -68,15 +51,6 @@ services:
       interval: 30s
       retries: 10
     labels:
-      - homepage.group=Media
-      - homepage.name=Radarr
-      - homepage.icon=radarr.png
-      - homepage.href=/radarr
-      - homepage.description=Movies management
-      - homepage.weight=1
-      - homepage.widget.type=radarr
-      - homepage.widget.url=http://radarr:7878/radarr
-      - homepage.widget.key=${RADARR_API_KEY}
       - "traefik.enable=true"
       - "traefik.http.routers.radarr.entrypoints=web"
       - "traefik.http.routers.radarr.rule=PathPrefix(`/radarr`)"
@@ -97,46 +71,10 @@ services:
       interval: 5s
       retries: 10
     labels:
-      - homepage.group=Download
-      - homepage.name=Bazarr
-      - homepage.icon=bazarr.png
-      - homepage.href=/bazarr
-      - homepage.description=Subtitles management
-      - homepage.weight=4
-      - homepage.widget.type=bazarr
-      - homepage.widget.url=http://bazarr:6767/bazarr
-      - homepage.widget.key=${BAZARR_API_KEY}
       - "traefik.enable=true"
       - "traefik.http.routers.bazarr.entrypoints=web"
       - "traefik.http.routers.bazarr.rule=PathPrefix(`/bazarr`)"
       - "traefik.http.services.bazarr.loadbalancer.server.port=6767"
-  # jellyseerr:
-  #   image: fallenbagel/jellyseerr:latest
-  #   container_name: jellyseerr
-  #   environment:
-  #     - LOG_LEVEL=debug
-  #     - TZ=${TIMEZONE}
-  #   volumes:
-  #     - ${CONFIG_ROOT:-.}/jellyseerr:/app/config
-  #   restart: always
-  #   healthcheck:
-  #     test: ["CMD", "wget", "http://127.0.0.1:5055/api/v1/status", "-qO", "/dev/null"]
-  #     interval: 30s
-  #     retries: 10
-  #   labels:
-  #     - homepage.group=Media
-  #     - homepage.name=JellySeerr
-  #     - homepage.icon=jellyseerr.png
-  #     - homepage.href=/jellyseerr
-  #     - homepage.description=Content Recommendations and Request Management
-  #     - homepage.weight=3
-  #     - homepage.widget.type=jellyseerr
-  #     - homepage.widget.url=http://jellyseerr:5055
-  #     - homepage.widget.key=${JELLYSEERR_API_KEY}
-  #     - "traefik.enable=true"
-  #     - "traefik.http.routers.jellyseerr.entrypoints=web"
-  #     - "traefik.http.routers.jellyseerr.rule=PathPrefix(`/jellyseerr`)"
-  #     - "traefik.http.services.jellyseerr.loadbalancer.server.port=5055"
   prowlarr:
     image: lscr.io/linuxserver/prowlarr:latest
     container_name: prowlarr
@@ -152,15 +90,6 @@ services:
       interval: 30s
       retries: 10
     labels:
-      - homepage.group=Download
-      - homepage.name=Prowlarr
-      - homepage.icon=prowlarr.png
-      - homepage.href=/prowlarr
-      - homepage.description=Indexers management
-      - homepage.weight=1
-      - homepage.widget.type=prowlarr
-      - homepage.widget.url=http://prowlarr:9696/prowlarr
-      - homepage.widget.key=${PROWLARR_API_KEY}
       - "traefik.enable=true"
       - "traefik.http.routers.prowlarr.entrypoints=web"
       - "traefik.http.routers.prowlarr.rule=PathPrefix(`/prowlarr`)"
@@ -188,18 +117,6 @@ services:
     depends_on:
       vpn:
         condition: service_healthy
-    labels:
-      #- com.centurylinklabs.watchtower.depends-on=/vpn
-      - homepage.group=Download
-      - homepage.name=qBittorrent
-      - homepage.icon=qbittorrent.png
-      - homepage.href=/qbittorrent
-      - homepage.description=Bittorrent client
-      - homepage.weight=2
-      - homepage.widget.type=qbittorrent
-      - homepage.widget.url=http://vpn:8080
-      - homepage.widget.username=${QBITTORRENT_USERNAME}
-      - homepage.widget.password=${QBITTORRENT_PASSWORD}
   vpn:
     image: ghcr.io/bubuntux/nordlynx
     container_name: vpn
@@ -255,15 +172,6 @@ services:
       - ${DATA_ROOT}:/data
     restart: always
     labels:
-      - homepage.group=Download
-      - homepage.name=Sabnzbd
-      - homepage.icon=sabnzbd.png
-      - homepage.href=/sabnzbd
-      - homepage.description=Usenet
-      - homepage.weight=3
-      - homepage.widget.type=sabnzbd
-      - homepage.widget.url=http://sabnzbd:8080/sabnzbd
-      - homepage.widget.key=${SABNZBD_API_KEY}
       # Traefik labels
       - "traefik.enable=true"
       - "traefik.http.routers.sabnzbd.entrypoints=web"
@@ -300,15 +208,6 @@ services:
       interval: 30s
       retries: 10
     labels:
-      - homepage.group=Media
-      - homepage.name=Jellyfin
-      - homepage.icon=jellyfin.png
-      - homepage.href=/jellyfin
-      - homepage.description=Media server
-      - homepage.weight=4
-      - homepage.widget.type=jellyfin
-      - homepage.widget.url=http://jellyfin:8096/jellyfin
-      - homepage.widget.key=${JELLYFIN_API_KEY}
       # Traefik labels
       - "traefik.enable=true"
       - "traefik.http.routers.jellyfin.entrypoints=web"
