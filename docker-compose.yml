@@ -212,6 +212,9 @@ services:
     image: ghcr.io/manimatter/decluttarr:latest
     container_name: decluttarr
     restart: always
+depends_on:
+      qbittorrent:
+        condition: service_healthy
     environment:
       TZ: ${TIMEZONE}
       PUID: ${USER_ID}
