@@ -160,25 +160,6 @@ services:
       - UN_RADARR_0_API_KEY=${RADARR_API_KEY}
     security_opt:
       - no-new-privileges:true
-  sabnzbd:
-    image: lscr.io/linuxserver/sabnzbd:latest
-    container_name: sabnzbd
-    environment:
-      - PUID=${USER_ID}
-      - PGID=${GROUP_ID}
-      - TZ=${TIMEZONE}
-    volumes:
-      - ${CONFIG_ROOT:-.}/sabnzbd:/config
-      - ${DATA_ROOT}:/data
-    restart: always
-    labels:
-      # Traefik labels
-      - "traefik.enable=true"
-      - "traefik.http.routers.sabnzbd.entrypoints=web"
-      - "traefik.http.routers.sabnzbd.rule=PathPrefix(`/sabnzbd`)"
-      - "traefik.http.services.sabnzbd.loadbalancer.server.port=8080"
-    profiles:
-      - sabnzbd
   jellyfin:
     image: lscr.io/linuxserver/jellyfin:latest
     container_name: jellyfin
