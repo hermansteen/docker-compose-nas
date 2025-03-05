@@ -110,33 +110,33 @@ services:
       - "traefik.http.routers.bazarr.entrypoints=web"
       - "traefik.http.routers.bazarr.rule=PathPrefix(`/bazarr`)"
       - "traefik.http.services.bazarr.loadbalancer.server.port=6767"
-  jellyseerr:
-    image: fallenbagel/jellyseerr:latest
-    container_name: jellyseerr
-    environment:
-      - LOG_LEVEL=debug
-      - TZ=${TIMEZONE}
-    volumes:
-      - ${CONFIG_ROOT:-.}/jellyseerr:/app/config
-    restart: always
-    healthcheck:
-      test: ["CMD", "wget", "http://127.0.0.1:5055/api/v1/status", "-qO", "/dev/null"]
-      interval: 30s
-      retries: 10
-    labels:
-      - homepage.group=Media
-      - homepage.name=JellySeerr
-      - homepage.icon=jellyseerr.png
-      - homepage.href=/jellyseerr
-      - homepage.description=Content Recommendations and Request Management
-      - homepage.weight=3
-      - homepage.widget.type=jellyseerr
-      - homepage.widget.url=http://jellyseerr:5055
-      - homepage.widget.key=${JELLYSEERR_API_KEY}
-      - "traefik.enable=true"
-      - "traefik.http.routers.jellyseerr.entrypoints=web"
-      - "traefik.http.routers.jellyseerr.rule=PathPrefix(`/jellyseerr`)"
-      - "traefik.http.services.jellyseerr.loadbalancer.server.port=5055"
+  # jellyseerr:
+  #   image: fallenbagel/jellyseerr:latest
+  #   container_name: jellyseerr
+  #   environment:
+  #     - LOG_LEVEL=debug
+  #     - TZ=${TIMEZONE}
+  #   volumes:
+  #     - ${CONFIG_ROOT:-.}/jellyseerr:/app/config
+  #   restart: always
+  #   healthcheck:
+  #     test: ["CMD", "wget", "http://127.0.0.1:5055/api/v1/status", "-qO", "/dev/null"]
+  #     interval: 30s
+  #     retries: 10
+  #   labels:
+  #     - homepage.group=Media
+  #     - homepage.name=JellySeerr
+  #     - homepage.icon=jellyseerr.png
+  #     - homepage.href=/jellyseerr
+  #     - homepage.description=Content Recommendations and Request Management
+  #     - homepage.weight=3
+  #     - homepage.widget.type=jellyseerr
+  #     - homepage.widget.url=http://jellyseerr:5055
+  #     - homepage.widget.key=${JELLYSEERR_API_KEY}
+  #     - "traefik.enable=true"
+  #     - "traefik.http.routers.jellyseerr.entrypoints=web"
+  #     - "traefik.http.routers.jellyseerr.rule=PathPrefix(`/jellyseerr`)"
+  #     - "traefik.http.services.jellyseerr.loadbalancer.server.port=5055"
   prowlarr:
     image: lscr.io/linuxserver/prowlarr:latest
     container_name: prowlarr
@@ -328,28 +328,58 @@ services:
       - "traefik.http.routers.requestrr.rule=PathPrefix(`/requestrr`)"
       - "traefik.http.services.requestrr.loadbalancer.server.port=4545"
     restart: unless-stopped
-  homepage:
-    image: ghcr.io/gethomepage/homepage:latest
-    container_name: homepage
-    environment:
-      - HOMEPAGE_VAR_TITLE=${HOMEPAGE_VAR_TITLE}
-      - HOMEPAGE_VAR_SEARCH_PROVIDER=${HOMEPAGE_VAR_SEARCH_PROVIDER}
-      - HOMEPAGE_VAR_HEADER_STYLE=${HOMEPAGE_VAR_HEADER_STYLE}
-      - HOMEPAGE_VAR_WEATHER_CITY=${HOMEPAGE_VAR_WEATHER_CITY}
-      - HOMEPAGE_VAR_WEATHER_LAT=${HOMEPAGE_VAR_WEATHER_LAT}
-      - HOMEPAGE_VAR_WEATHER_LONG=${HOMEPAGE_VAR_WEATHER_LONG}
-      - HOMEPAGE_VAR_WEATHER_TIME=${TIMEZONE}
-      - HOMEPAGE_VAR_WEATHER_UNIT=${HOMEPAGE_VAR_WEATHER_UNIT}
-    volumes:
-      - ${CONFIG_ROOT:-.}/homepage:/app/config
-      - /var/run/docker.sock:/var/run/docker.sock:ro
-      - ${DATA_ROOT}:/data
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.homepage.entrypoints=web"
-      - "traefik.http.routers.homepage.rule=PathPrefix(`/homepage`)"
+  decluttarr:
+    image: ghcr.io/manimatter/decluttarr:latest
+    container_name: decluttarr
     restart: always
-    command: [sh, -c, "cp -n /app/config/tpl/*.yaml /app/config && node server.js"]
+    environment:
+      TZ: ${TIMEZONE}
+      PUID: ${USER_ID}
+      PGID: ${GROUP_ID}
+
+      ## General
+      # TEST_RUN: True
+      # SSL_VERIFICATION: False
+      LOG_LEVEL: INFO
+
+      ## Features
+      REMOVE_TIMER: 10
+      REMOVE_FAILED: True
+      REMOVE_FAILED_IMPORTS: True
+      REMOVE_METADATA_MISSING: True
+      REMOVE_MISSING_FILES: True
+      REMOVE_ORPHANS: True
+      REMOVE_SLOW: False
+      REMOVE_STALLED: True
+      REMOVE_UNMONITORED: True
+      RUN_PERIODIC_RESCANS: '
+        {
+        "SONARR": {"MISSING": true, "CUTOFF_UNMET": true, "MAX_CONCURRENT_SCANS": 3, "MIN_DAYS_BEFORE_RESCAN": 7},
+        "RADARR": {"MISSING": true, "CUTOFF_UNMET": true, "MAX_CONCURRENT_SCANS": 3, "MIN_DAYS_BEFORE_RESCAN": 7}
+        }'
+
+      # Feature Settings
+      PERMITTED_ATTEMPTS: 3
+      NO_STALLED_REMOVAL_QBIT_TAG: Don't Kill
+      MIN_DOWNLOAD_SPEED: 100
+      FAILED_IMPORT_MESSAGE_PATTERNS: '
+        [
+        "Not a Custom Format upgrade for existing",
+        "Not an upgrade for existing"
+        ]'
+
+      ## Radarr
+      RADARR_URL: http://radarr:7878
+      RADARR_KEY: ${RADARR_API_KEY}
+
+      ## Sonarr
+      SONARR_URL: http://sonarr:8989
+      SONARR_KEY: ${SONARR_API_KEY}
+
+      ## qBitorrent
+      QBITTORRENT_URL: http://vpn:8080
+      QBITTORRENT_USERNAME: ${QBITTORRENT_USERNAME}
+      QBITTORRENT_PASSWORD: ${QBITTORRENT_PASSWORD}
   watchtower:
     image: containrrr/watchtower
     container_name: watchtower
