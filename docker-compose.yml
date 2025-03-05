@@ -274,7 +274,16 @@ services:
   jellyfin:
     image: lscr.io/linuxserver/jellyfin:latest
     container_name: jellyfin
+    deploy:
+      resources:
+        reservations:
+          devices:
+          - driver: cdi
+            device_ids:
+            - nvidia.com/gpu=all
+            capabilities: [gpu]
     environment:
+      - NVIDIA_VISIBLE_DEVICES=all
       - PUID=${USER_ID}
       - PGID=${GROUP_ID}
       - TZ=${TIMEZONE}
