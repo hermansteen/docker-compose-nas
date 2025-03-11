@@ -211,6 +211,10 @@ services:
       - "traefik.http.routers.requestrr.entrypoints=web"
       - "traefik.http.routers.requestrr.rule=PathPrefix(`/requestrr`)"
       - "traefik.http.services.requestrr.loadbalancer.server.port=4545"
+    healthcheck:
+      test: [ "CMD", "curl", "--fail", "http://localhost:4545" ]
+      interval: 30s
+      retries: 10
     restart: unless-stopped
   decluttarr:
     image: ghcr.io/manimatter/decluttarr:latest
